@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Expense Tracker</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 700px; margin: 40px auto; padding: 0 20px; background: #f5f5f5; }
+    h1 { color: #333; }
+    input, select, button { padding: 8px; margin: 5px; border-radius: 4px; border: 1px solid #ccc; }
+    button { background: #4CAF50; color: white; border: none; cursor: pointer; }
+    button.del { background: #e53935; }
+    table { width: 100%; border-collapse: collapse; background: white; margin-top: 20px; }
+    th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
+    th { background: #4CAF50; color: white; }
+    #total { font-size: 1.2em; font-weight: bold; margin-top: 15px; }
+  </style>
+</head>
+<body>
+  <h1>💸 Expense Tracker</h1>
+
+  <div>
+    <input id="title" placeholder="Title" />
+    <input id="amount" type="number" placeholder="Amount" />
+    <select id="category">
+      <option>Food</option>
+      <option>Travel</option>
+      <option>Shopping</option>
+      <option>Bills</option>
+      <option>Other</option>
+    </select>
+    <button onclick="addExpense()">Add</button>
+  </div>
+
+  <div style="margin-top:10px;">
+    <label>Filter by category:</label>
+    <select id="filterCat">
+      <option value="">All</option>
+      <option>Food</option>
+      <option>Travel</option>
+      <option>Shopping</option>
+      <option>Bills</option>
+      <option>Other</option>
+    </select>
+    <button onclick="loadExpenses()">Filter</button>
+  </div>
+
+  <div id="total">Total: ₹0</div>
+
+  <table>
+    <thead><tr><th>Title</th><th>Amount</th><th>Category</th><th>Action</th></tr></thead>
+    <tbody id="expenseList"></tbody>
+  </table>
+
+  <script>
+    async function loadExpenses() {
+      const cat = document.getElementById('filterCat').value;
+      const url = cat ? `/expenses?category=${cat}` : '/expenses';
+      const res = await fetch(url);
+      const data = await res.json();
+      const tbody = document.getElementById('expenseList');
+      tbody.innerHTML = '';
+      data.forEach(e => {
+        tbody.innerHTML += `<tr>
+          <td>${e.title}</td>
+          <td>₹${e.amount}</td>
+          <td>${e.category}</td>
+          <td><button class="del" onclick="deleteExpense('${e.id}')">Delete</button></td>
+        </tr>`;
+      });
+      const totalRes = await fetch('/expenses/total');
+      const totalData = await totalRes.json();
+      document.getElementById('total').innerText = `Total: ₹${totalData.total}`;
+    }
+
+    async function addExpense() {
+      const title = document.getElementById('title').value;
+      const amount = document.getElementById('amount').value;
+      const category = document.getElementById('category').value;
+      if (!title || !amount) return alert('Fill all fields');
+      await fetch('/expenses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, amount, category })
+      });
+      document.getElementById('title').value = '';
+      document.getElementById('amount').value = '';
+      loadExpenses();
+    }
+
+    async function deleteExpense(id) {
+      await fetch(`/expenses/${id}`, { method: 'DELETE' });
+      loadExpenses();
+    }
+
+    loadExpenses();
+  </script>
+</body>
+</html>

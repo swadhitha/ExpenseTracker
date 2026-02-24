@@ -18,6 +18,8 @@ jobs:
       # STAGE 2 - Build
       - name: Build - Install Dependencies
         run: |
+          cd $GITHUB_WORKSPACE
+          ls -la
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           echo "Build successful"

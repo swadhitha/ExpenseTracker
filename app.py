@@ -41,10 +41,3 @@ def get_total():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
-```
-
----
-
-**File 2: `requirements.txt`** — create this in the root folder and paste:
-```
-flask==3.0.0
